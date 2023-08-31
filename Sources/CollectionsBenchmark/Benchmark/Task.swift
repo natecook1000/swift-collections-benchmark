@@ -14,7 +14,7 @@ public struct Task<Input> {
   public let maxSize: Int?
   public let file: StaticString
   public let line: UInt
-  public let body: (Input) -> Benchmark.TaskBody?
+  public let body: (Input) async -> Benchmark.TaskBody?
 
   public init(
     _ title: String,
@@ -22,7 +22,7 @@ public struct Task<Input> {
     maxSize: Int? = nil,
     file: StaticString = #filePath,
     line: UInt = #line,
-    body: @escaping (Input) -> Benchmark.TaskBody?
+    body: @escaping (Input) async -> Benchmark.TaskBody?
   ) {
     if let error = TaskID._validateTitle(title) {
       preconditionFailure("'\(title)': \(error)", file: (file), line: line)
@@ -46,12 +46,12 @@ extension Task {
     size: Size,
     input: Input,
     options: Benchmark.Options
-  ) -> Time? {
+  ) async -> Time? {
     if let maxSize = self.maxSize, size.rawValue > maxSize {
       _debug("Ignoring '\(title)' at size \(size)")
       return nil
     }
-    guard let instance = self.body(input) else {
+    guard let instance = await self.body(input) else {
       _debug("Ignoring '\(title)' at size \(size)")
       return nil
     }
@@ -68,7 +68,7 @@ extension Task {
     // we run short tasks multiple times, and we adjust iteration counts as
     // we go.
 
-    let (firstTime, hasNestedMeasurement) = Timer._measureFirst(instance)
+    let (firstTime, hasNestedMeasurement) = await Timer._measureFirst(instance)
     
     if hasNestedMeasurement {
       // We can't do iterating measurements. Loop over individual
@@ -84,7 +84,7 @@ extension Task {
           Time.since(wallClockStart)
         if wallClockDuration > maxDuration { break }
         if iteration > options.iterations, wallClockDuration > minTime { break }
-        let time = Timer._nestedMeasure(instance)
+        let time = await Timer._nestedMeasure(instance)
         minTime = min(minTime, time)
         iteration += 1
       } while true
@@ -127,7 +127,7 @@ extension Task {
         break
       }
 
-      let time = Timer._iteratingMeasure(iterations: batch, instance)
+      let time = await Timer._iteratingMeasure(iterations: batch, instance)
       minTime = min(minTime, time)
       iteration += batch
     }

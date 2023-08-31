@@ -10,7 +10,7 @@
 //===----------------------------------------------------------------------===//
 
 public struct Benchmark {
-  public typealias TaskBody = (inout Timer) -> Void
+  public typealias TaskBody = (inout Timer) async -> Void
 
   public let title: String
   internal var _tasks: _SimpleOrderedDictionary<String, AnyTask> = [:]
@@ -116,10 +116,10 @@ extension Benchmark {
     maxSize: Int? = nil,
     file: StaticString = #filePath,
     line: UInt = #line,
-    body: @escaping (Input) -> Void
+    body: @escaping (Input) async -> Void
   ) {
     let task = Task<Input>(title, maxSize: maxSize, file: file, line: line) { input in
-      return { timer in body(input) }
+      { timer in await body(input) }
     }
     add(task)
   }

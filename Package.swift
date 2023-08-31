@@ -33,6 +33,7 @@ if settings?.isEmpty == true { settings = nil }
 
 let package = Package(
   name: "swift-collections-benchmark",
+  platforms: [.macOS(.v11)],
   products: [
     .library(name: "CollectionsBenchmark", targets: ["CollectionsBenchmark"]),
   ],
