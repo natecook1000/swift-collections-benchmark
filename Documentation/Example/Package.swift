@@ -1,9 +1,10 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.5
 
 import PackageDescription
 
 let package = Package(
     name: "Kalimba",
+    platforms: [.macOS(.v11)],
     products: [
         .library(
             name: "Kalimba",
@@ -11,7 +12,7 @@ let package = Package(
         .executable(name: "kalimba-benchmark", targets: ["kalimba-benchmark"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-collections-benchmark", from: "0.0.1"),
+        .package(path: "../../"),
         .package(url: "https://github.com/apple/swift-collections", from: "0.0.1"),
     ],
     targets: [
@@ -20,7 +21,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Collections", package: "swift-collections"),
             ]),
-        .target(
+        .executableTarget(
             name: "kalimba-benchmark",
             dependencies: [
                 "Kalimba",
